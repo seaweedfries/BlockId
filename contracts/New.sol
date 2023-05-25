@@ -1,6 +1,6 @@
 pragma solidity >=0.4.20;
 
-contract SimpleStorage {
+contract New {
     uint256 storedData;
 
     function set(uint256 x) public {
