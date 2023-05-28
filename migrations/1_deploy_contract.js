@@ -1,5 +1,5 @@
-const SimpleStorage = artifacts.require("./New.sol");
+const mintNFT = artifacts.require("./mintNFT.sol");
 
 module.exports = function(deployer) {
- deployer.deploy(SimpleStorage);
+ deployer.deploy(mintNFT);
 };

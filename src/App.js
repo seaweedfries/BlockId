@@ -1,25 +1,69 @@
-import logo from './logo.svg';
+import React from "react";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState } from 'react'
+import Web3 from 'web3';
 import './App.css';
 
+import mintNFT from "./abi/mintNFT.json";
+import Home from './pages/home';
+import CreateNFT from "./pages/create-nft";
+
+import Navbar from './components/layout/navbar/Navbar';
+// import Footer from './components/layout/footer/Footer';
+
 function App() {
+  const [account, setAccount] = useState('')
+  const [contractData, setContractData] = useState('')
+
+  const loadWeb3 = async () => {
+    if (window.ethereum) {
+      window.web3 = new Web3(window.ethereum)
+      await window.ethereum.request({ method: 'eth_requestAccounts' })
+    } else if (window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider)
+    } else {
+      window.alert(
+        'Non-Ethereum browser detected. You should consider trying Metamask!',
+      )
+    }
+  }
+
+  const getContract = async () => {
+    const web3 = window.web3
+    const accounts = await web3.eth.getAccounts()
+    setAccount(accounts[0])
+    const networkId = await web3.eth.net.getId()
+    const networkData = mintNFT.networks[networkId]
+
+    if (networkData) {
+      const abi = mintNFT.abi
+      const address = "0x1c11Fd298278d30014644DA1c5c8975f84294F48";
+      const myContract = new web3.eth.Contract(abi, address)
+      setContractData(myContract)
+    } else {
+      window.alert(
+        'Contract is not deployed to the detected network. Connect to the correct network!',
+      )
+    }
+  }
+
+  const connectWallet = async () => {
+    await loadWeb3()
+    await getContract()
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <BrowserRouter>
+      <div className="cl">
+      <Navbar account={account} connectWallet={connectWallet} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path='/create-nft' element={<CreateNFT />} />
+        </Routes>
+        {/* <Footer /> */}
+      </div>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
