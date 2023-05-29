@@ -1,22 +1,18 @@
 import React from 'react';
 import './create-nft.css'
 import { NFTStorage, File } from 'nft.storage'
-import { createRef } from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import uList from '../unapprovedNFTList';
 
 const apiKeys = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
 
-function CreateNFT() {
-	const navigate = useNavigate()
+function CreateNFT(props) {
 	const [image, setImage] = useState('')
-	const petTypeRef = createRef()
-	const [petName, setPetName] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [ownerName, setOwnerName] = useState('')
+	const [description, setDescription] = useState('')
+	const [nftName, setNftName] = useState('')
 	const [imageName, setImageName] = useState('')
 	const [imageType, setImageType] = useState('')
-	const [petType, setPetType] = useState('')
+	const [unapprovedList, setUnapprovedList] = useState(uList)
 
 	const handleImage = (event) => {
 		setImage(event.target.files[0])
@@ -27,19 +23,24 @@ function CreateNFT() {
 	const handleSubmit = async (event) => {
 		event.preventDefault()
 		try {
-		setLoading(true)
 		const client = new NFTStorage({ token: apiKeys })
 		const metadata = await client.store({
-			name: petName,
-			description: `${ownerName}, ${petType}`,
+			name: nftName,
+			description: `${description}`,
+			owner: props.account,
 			image: new File([image], imageName, { type: imageType }),
-		})
+		})		
+
 		if (metadata) {
 			document.getElementById("status").textContent = "Sent!";
+			const url = metadata.url,
+			time = Date().toLocaleString(),
+			newList = unapprovedList.push({metadata.url, props.account, Date().toLocaleString()}); //check sending
+			setUnapprovedList(newList);
+			console.log(unapprovedList);
 		}
 		} catch (error) {
 		console.log(error)
-		setLoading(false)
 		}
 	}
 
@@ -72,6 +73,16 @@ function CreateNFT() {
 		type="file"
 		/>
 		</span>
+		<label>NFT Name:</label>
+		<input
+		fullWidth
+		id="outlined-basic"
+		label="NFT's name"
+		variant="outlined"
+		className="text-field"
+		defaultValue={nftName}
+		onChange={(e) => setNftName(e.target.value)}
+		/>
 		<label>Owner Name:</label>
 		<input
 		fullWidth
@@ -79,8 +90,8 @@ function CreateNFT() {
 		label="Owner's name"
 		variant="outlined"
 		className="text-field"
-		defaultValue={ownerName}
-		onChange={(e) => setOwnerName(e.target.value)}
+		defaultValue={description}
+		onChange={(e) => setDescription(e.target.value)}
 		/>
 		<button
 		size="large"

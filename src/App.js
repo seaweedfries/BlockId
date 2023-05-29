@@ -7,9 +7,9 @@ import './App.css';
 import mintNFT from "./abi/mintNFT.json";
 import Home from './pages/home';
 import CreateNFT from "./pages/create-nft";
+import ApproveNFT from './pages/approve-nft';
 
 import Navbar from './components/layout/navbar/Navbar';
-// import Footer from './components/layout/footer/Footer';
 
 function App() {
   const [account, setAccount] = useState('')
@@ -58,9 +58,9 @@ function App() {
       <Navbar account={account} connectWallet={connectWallet} />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path='/create-nft' element={<CreateNFT />} />
+          <Route path='/create-nft' element={<CreateNFT account={account}/>} />
+          <Route path='/approve-nft' element={<ApproveNFT account={account}/>} />
         </Routes>
-        {/* <Footer /> */}
       </div>
     </BrowserRouter>
   )

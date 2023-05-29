@@ -45,48 +45,26 @@ function Home() {
 	  }, [])
   
 	return (
-	  <div style={{ minHeight: '10vh', paddingBottom: '3rem' }}>
-		 {
-    <div style={{ flexGrow: 1, height:500}}>
-      <table container spacing={1}>
-        {petsData.length ? (
-          petsData.map((pet, index) => (
-            <table item xs={6} sm={3} key={index}>
-              <table style={{ height: '10px', listStyle: 'none' }}>
-                <img src={pet.image} alt={pet.name} height={300}/>
-                <p
-                  title={pet.name}
-                  subtitle={<span>by: {pet.description}</span>}
-                  actionIcon={
-                    <button
-                      aria-label={`info about ${pet.name}`}
-                      className="icon"
-                    >
-                      <button
-                        variant="contained"
-                        size="small"
-                        component={Link}
-                        to={`/pet-details/${pet.cid}`}
-                        className="view-btn"
-                      >
-                        View
-                      </button>
-                    </button>
-                  }
-                />
-              </table>
-            </table>
-          ))
-        ) : (
-          <h2>No Pets Yet...</h2>
-        )}
-      </table>
-    </div>
-}
-  
-  
-	  </div>
+	<div style={{ minHeight: '10vh', paddingBottom: '3rem' }}>
+		<div style={{ flexGrow: 1, height:500}}>
+			<table>
+				{petsData.length ? (
+					petsData.map((pet, index) => (
+						<tr key={index}>
+							<td>{
+								<img src={pet.image} height={200}/>
+								}</td>
+                            <td>{pet.name}</td>
+							<td>{pet.description}</td>
+						</tr>
+					))
+				) : (
+					<h3>No NFTs Yet...</h3>
+				)}
+			</table>
+		</div>
+	</div>
 	)
-  }
+}
 
 export default Home;
