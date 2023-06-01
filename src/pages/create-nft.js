@@ -2,7 +2,6 @@ import React from 'react';
 import './create-nft.css'
 import { NFTStorage, File } from 'nft.storage'
 import { useState } from 'react'
-import uList from '../unapprovedNFTList';
 
 const apiKeys = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
 
@@ -12,7 +11,7 @@ function CreateNFT(props) {
 	const [nftName, setNftName] = useState('')
 	const [imageName, setImageName] = useState('')
 	const [imageType, setImageType] = useState('')
-	const [unapprovedList, setUnapprovedList] = useState(uList)
+	
 
 	const handleImage = (event) => {
 		setImage(event.target.files[0])
@@ -33,11 +32,7 @@ function CreateNFT(props) {
 
 		if (metadata) {
 			document.getElementById("status").textContent = "Sent!";
-			const url = metadata.url,
-			time = Date().toLocaleString(),
-			newList = unapprovedList.push({metadata.url, props.account, Date().toLocaleString()}); //check sending
-			setUnapprovedList(newList);
-			console.log(unapprovedList);
+			props.updateUList(metadata.url);	
 		}
 		} catch (error) {
 		console.log(error)

@@ -14,6 +14,7 @@ import Navbar from './components/layout/navbar/Navbar';
 function App() {
   const [account, setAccount] = useState('')
   const [contractData, setContractData] = useState('')
+  const [unapprovedList, setUnapprovedList] = useState([])
 
   const loadWeb3 = async () => {
     if (window.ethereum) {
@@ -37,7 +38,7 @@ function App() {
 
     if (networkData) {
       const abi = mintNFT.abi
-      const address = "0x1c11Fd298278d30014644DA1c5c8975f84294F48";
+      const address = "0x1c11Fd298278d30014644DA1c5c8975f84294F48"; //contract address
       const myContract = new web3.eth.Contract(abi, address)
       setContractData(myContract)
     } else {
@@ -52,14 +53,19 @@ function App() {
     await getContract()
   }
 
+  async function updateUList(url) {
+    var time = Date().toLocaleString()
+    await setUnapprovedList([...unapprovedList,{url, account, time}]);
+  }
+
   return (
     <BrowserRouter>
       <div className="cl">
       <Navbar account={account} connectWallet={connectWallet} />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path='/create-nft' element={<CreateNFT account={account}/>} />
-          <Route path='/approve-nft' element={<ApproveNFT account={account}/>} />
+          <Route path='/create-nft' element={<CreateNFT account={account} updateUList={updateUList}/>} />
+          <Route path='/approve-nft' element={<ApproveNFT account={account} unapprovedList={unapprovedList} updateUList= {updateUList} contract={contractData}/>} />
         </Routes>
       </div>
     </BrowserRouter>

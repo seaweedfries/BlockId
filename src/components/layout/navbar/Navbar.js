@@ -40,6 +40,9 @@ export default function Navbar(props) {
         <button
           variant="contained"
           className="connected-btn"
+          onClick={() => {
+            props.connectWallet()
+          }}
         >
           Connected
         </button>

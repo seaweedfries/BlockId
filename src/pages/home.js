@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom'
 
 const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
 
@@ -50,9 +49,10 @@ function Home() {
 			<table>
 				{petsData.length ? (
 					petsData.map((pet, index) => (
+						// if (pet.owner == props.account) {} //give list of approved nfts per account address.
 						<tr key={index}>
 							<td>{
-								<img src={pet.image} height={200}/>
+								<img src={pet.image} alt={''} height={200}/>
 								}</td>
                             <td>{pet.name}</td>
 							<td>{pet.description}</td>
