@@ -1,4 +1,5 @@
 import React from "react";
+import { ChakraProvider } from '@chakra-ui/react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState } from 'react'
 import Web3 from 'web3';
@@ -10,11 +11,15 @@ import CreateNFT from "./pages/create-nft";
 import ApproveNFT from './pages/approve-nft';
 
 import Navbar from './components/layout/navbar/Navbar';
+import PetDetails from "./pages/detailed-nft";
 
 function App() {
   const [account, setAccount] = useState('')
   const [contractData, setContractData] = useState('')
   const [unapprovedList, setUnapprovedList] = useState([])
+  const [approvedList, setApprovedList] = useState({})
+  const [tokenid, setTokenId] = useState(0);
+  const [nftList, setNftList] = useState([]);
 
   const loadWeb3 = async () => {
     if (window.ethereum) {
@@ -38,7 +43,7 @@ function App() {
 
     if (networkData) {
       const abi = mintNFT.abi
-      const address = "0x1c11Fd298278d30014644DA1c5c8975f84294F48"; //contract address
+      const address = "0x1c11Fd298278d30014644DA1c5c8975f84294F48"; //contract address CHANGE THIS
       const myContract = new web3.eth.Contract(abi, address)
       setContractData(myContract)
     } else {
@@ -58,18 +63,51 @@ function App() {
     await setUnapprovedList([...unapprovedList,{url, account, time}]);
   }
 
+  async function updateAList(address, tokenid, cid, txHash) {
+    var tempList = approvedList;
+    if (tempList[address] == undefined) {
+      tempList[address] = []
+      console.log("making new address")
+    }
+    tempList[address].push(tokenid);
+    await setNftList([...nftList, [cid, txHash]]);
+    await setApprovedList(tempList);
+  }
+
   return (
-    <BrowserRouter>
-      <div className="cl">
-      <Navbar account={account} connectWallet={connectWallet} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path='/create-nft' element={<CreateNFT account={account} updateUList={updateUList}/>} />
-          <Route path='/approve-nft' element={<ApproveNFT account={account} unapprovedList={unapprovedList} updateUList= {updateUList} contract={contractData}/>} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <ChakraProvider>
+      <BrowserRouter>
+        <div className="cl">
+        <Navbar account={account} connectWallet={connectWallet} />
+          <Routes>
+            <Route path="/" element={
+              <Home 
+              approvedList={approvedList}
+              nftList={nftList}
+              account={account}
+              />} />
+            <Route path='/create-nft' element={<CreateNFT account={account} updateUList={updateUList}/>} />
+            <Route path='/approve-nft' element={
+              <ApproveNFT 
+                account={account} 
+                contract={contractData}
+                approvedList={approvedList}
+                unapprovedList={unapprovedList} 
+                tokenid={tokenid}
+                setUnapprovedList={setUnapprovedList}
+                updateAList={updateAList}
+                setTokenId={setTokenId}
+                />} />
+            <Route path='/nft-details/:nftId/:nfttxhsh' element={<PetDetails nftList={nftList}/>}>
+            </Route>
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </ChakraProvider>
   )
 }
 
 export default App
+
+
+

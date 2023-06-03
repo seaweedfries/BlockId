@@ -1,25 +1,19 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Grid, GridItem, Stack, Text, Image, Box, Button } from '@chakra-ui/react'
 
-const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
-
-function Home() {
+function Home(props) {
 	const [petsData, setPetsData] = useState([])
   
-	useEffect(() => {
+	useEffect(() => { //find corresponding ids in approvedlist, get cid from it -> pull from nft.storage
 		const loadPets = async () => {
 		  try {
-			let cids = await fetch('https://api.nft.storage', {
-			  headers: {
-				Authorization: `Bearer ${apiKey}`,
-				'Content-Type': 'application/json',
-			  },
-			})
-			cids = await cids.json()
 			const temp = []
-			for (let cid of cids.value) {
-			  if (cid?.cid) {
+			console.log(props.nftList)
+			for (let id in props.approvedList[props.account]) {
+			  if (id ? true : false) {
 				let data = await fetch(
-				  `https://ipfs.io/ipfs/${cid.cid}/metadata.json`,
+				  `https://ipfs.io/ipfs/${props.nftList[id][0]}/metadata.json`,
 				)
 				data = await data.json()
 	  
@@ -30,8 +24,8 @@ function Home() {
 				}
 	  
 				data.image = await getImage(data.image)
-				data.cid = cid.cid
-				data.created = cid.created
+				data.cid = props.nftList[id][0]
+				data.txHash = props.nftList[id][1]
 				temp.push(data)
 			  }
 			}
@@ -42,28 +36,32 @@ function Home() {
 		}
 		loadPets()
 	  }, [])
+
+	let navigate = useNavigate(); 
+  	const routeChange = (cid, txHash) =>{ 
+		let path = `/nft-details/${cid}/${txHash}`; 
+		navigate(path);
+  	}
   
-	return (
-	<div style={{ minHeight: '10vh', paddingBottom: '3rem' }}>
-		<div style={{ flexGrow: 1, height:500}}>
-			<table>
-				{petsData.length ? (
-					petsData.map((pet, index) => (
-						// if (pet.owner == props.account) {} //give list of approved nfts per account address.
-						<tr key={index}>
-							<td>{
-								<img src={pet.image} alt={''} height={200}/>
-								}</td>
-                            <td>{pet.name}</td>
-							<td>{pet.description}</td>
-						</tr>
-					))
-				) : (
-					<h3>No NFTs Yet...</h3>
-				)}
-			</table>
-		</div>
-	</div>
+	return ( //Image, Title, tokenid
+		<Grid templateColumns='repeat(4, 1fr)' gap={1}>
+			{petsData.length ? (
+							petsData.map((pet, index) => (
+								<GridItem>
+									<Box display='flex' justifyContent="center" bg='blue.100' boxSize={350} borderRadius='lg' padding={3} margin={3}>
+									<Stack direction={'column'}>
+										<Image src={pet.image} alt={''} height="200px"/>
+										<Text alignSelf={'center'}>{pet.name}</Text>
+										<Text alignSelf={'center'}>{pet.description}</Text>
+										<Button component={Link} onClick={() => routeChange(pet.cid, pet.txHash)}>View</Button>
+									</Stack>
+									</Box>
+								</GridItem>
+							))
+						) : (
+							<GridItem>No Approved NFTs Yet...</GridItem>
+						)}	
+		</Grid>
 	)
 }
 
