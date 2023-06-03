@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
-
-const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
+import {
+	Table,
+	Thead,
+	Tbody,
+	Tr,
+	Th,
+	Td,
+	TableContainer,
+	Button
+  } from '@chakra-ui/react'
 
 function ApproveNFT(props) {
     const [petsData, setPetsData] = useState([])
@@ -8,18 +16,11 @@ function ApproveNFT(props) {
 	useEffect(() => {
 		const loadPets = async () => {
 		  try {
-			let cids = await fetch('https://api.nft.storage', {
-			  headers: {
-				Authorization: `Bearer ${apiKey}`,
-				'Content-Type': 'application/json',
-			  },
-			})
-			cids = await cids.json()
 			const temp = []
-			for (let cid of cids.value) {
-			  if (cid?.cid) {
+			for (let cid of props.unapprovedList) {
+			  if (cid?.url) {
 				let data = await fetch(
-				  `https://ipfs.io/ipfs/${cid.cid}/metadata.json`,
+				  `https://ipfs.io/ipfs/${cid.url}/metadata.json`,
 				)
 				data = await data.json()
 	  
@@ -30,8 +31,8 @@ function ApproveNFT(props) {
 				}
 	  
 				data.image = await getImage(data.image)
-				data.cid = cid.cid
-				data.created = cid.created
+				data.cid = cid.url
+				data.created = cid.time
 				temp.push(data)
 			  }
 			}
@@ -43,74 +44,71 @@ function ApproveNFT(props) {
 		loadPets()
 	  }, []);
 
-      const approveRequest = async (event) => {
-        console.log(props.unapprovedList)
-        // setArtists(
-            //     artists.filter(a =>
-            //       a.id !== artist.id
-            //     )
-        if (event) {
-            const address = props.account;
-            const tokenid = 1;
-            const url = "https://ipfs.io/ipfs/bafyreihgpsff6fsn7eg3rpv6y4z4xyonazqmdmudrb4b26u4k7t65p746e/metadata.json";
-            // "ipfs://bafyreihgpsff6fsn7eg3rpv6y4z4xyonazqmdmudrb4b26u4k7t65p746e/metadata.json"
-            const gas = await props.contract.methods.mint(address, tokenid, url).estimateGas();
-            await props.contract.methods.mint(address, tokenid, url).send({
+      const approveRequest = async (event, pet) => {
+        if (event == true) {
+            const address = pet.owner;
+            props.setTokenId(props.tokenid + 1);
+			var txHash = '';
+            const url = `https://ipfs.io/ipfs/${pet.cid}/metadata.json`;
+            const gas = await props.contract.methods.mint(address, props.tokenid, url).estimateGas();
+            const data = await props.contract.methods.mint(address, props.tokenid, url).send({
                 from: props.account,
                 gas,
-            });
-            //add to approved list
+            })
+			.then(function(tx) {
+				txHash = tx.transactionHash;
+			})
+			.catch(function(e) {console.log(e)});
+
+			props.updateAList(address, props.tokenid, pet.cid, txHash);
+			
         }
         else {
             console.log("Request Rejected")
         }
+		props.setUnapprovedList(props.unapprovedList.filter(request => request['url'] !== pet.cid));
     }
           
 	return (
-	<div style={{ minHeight: '10vh', paddingBottom: '3rem' }}>
-		<div style={{ flexGrow: 1, height:500}}>
-			<table>
-                <tr>
-                    <th>Image</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Address</th>
-                </tr>
-				{petsData.length ? (
-					petsData.map((pet, index) => (
-						<tr key={index}>
-							<td>{
-								<img src={pet.image} alt={''} height={200}/>
-								}</td>
-                            <td>{pet.name}</td>
-							<td>{pet.description}</td>
-                            <td>{pet.owner}</td>
-                            <td><button
-                                size="large"
-                                variant="contained"
-                                color="primary"
-                                onClick={() => approveRequest(true)} //true with nft details to find from unapprovedlist
+		<TableContainer>
+			<Table variant='striped'>
+				<Thead>
+				<Tr>
+					<Th>Image</Th>
+					<Th>Title</Th>
+					<Th>Description</Th>
+					<Th>Owner's Address</Th>
+					<Th></Th>
+				</Tr>
+				</Thead>
+				<Tbody>
+					{petsData.length ? (petsData.map((pet, index) => (
+						<Tr key={index}>
+							<Td>{
+								<img src={pet.image} alt={''} width="200px"/>
+								}</Td>
+                            <Td>{pet.name}</Td>
+							<Td>{pet.description}</Td>
+                            <Td>{pet.owner}</Td>
+                            <Td><Button
+                                onClick={() => approveRequest(true, pet)}
                                 >
                                 Approve
-                                </button>
-                            </td>
-                            <td><button
-                                size="large"
-                                variant="contained"
-                                color="primary"
-                                onClick={() => approveRequest(false)}
+                                </Button>
+								<Button
+                                onClick={() => approveRequest(false, pet)}
                                 >
                                 Reject
-                                </button>
-                            </td>
-						</tr>
+                                </Button>
+                            </Td>
+						</Tr>
 					))
 				) : (
-					<h3>No NFTs Requests Yet...</h3>
+					<Tr>No NFTs Requests Yet...</Tr>
 				)}
-			</table>
-		</div>
-	</div>
+				</Tbody>
+			</Table>
+		</TableContainer>
 	)
 }
 

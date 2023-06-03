@@ -1,10 +1,10 @@
 module.exports = {
   networks: {
     development: {
-      host: "127.0.0.1",
-      port: '3334',
+      host: "127.0.0.1", //address CHANGE THIS IF NOT USING LOCAL HOST
+      port: '3334', //port number CHANGE THIS
       network_id: '*',
-      from: '0x8519EFB74800372022094790175dB23f8Fe751c5',
+      from: '0xbBf359CA690500312003763c73Fbc21Ce3A8987A', //contract owner address CHANGE THIS
       gas: 0
     }
   },

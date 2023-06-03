@@ -1,8 +1,17 @@
 import React from 'react';
-import './create-nft.css'
 import { NFTStorage, File } from 'nft.storage'
 import { useState } from 'react'
+import { 
+	Box,
+	Text,
+	Divider,
+	Stack,
+	Image,
+	Button,
+	Input,
+ } from '@chakra-ui/react'
 
+ //nft.storage API key CHANGE THIS
 const apiKeys = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDA1ZGJEMzM4N2U3ZDJhNTRCODQwYkFjOUVmZGIwOTJkNGRGMTVGZDMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY4NTI4NjczOTA1MCwibmFtZSI6IkJsb2NrSUQifQ.PetsVefIO9rpoSHXg6EYwzLdgexFGEmh02yH0ORMLVQ';
 
 function CreateNFT(props) {
@@ -11,6 +20,7 @@ function CreateNFT(props) {
 	const [nftName, setNftName] = useState('')
 	const [imageName, setImageName] = useState('')
 	const [imageType, setImageType] = useState('')
+	const [isLoading, setIsLoading] = useState(true)
 	
 
 	const handleImage = (event) => {
@@ -21,6 +31,7 @@ function CreateNFT(props) {
 
 	const handleSubmit = async (event) => {
 		event.preventDefault()
+		setIsLoading(false)
 		try {
 		const client = new NFTStorage({ token: apiKeys })
 		const metadata = await client.store({
@@ -31,8 +42,9 @@ function CreateNFT(props) {
 		})		
 
 		if (metadata) {
-			document.getElementById("status").textContent = "Sent!";
-			props.updateUList(metadata.url);	
+			setIsLoading(true)
+			props.updateUList(metadata.ipnft);
+			console.log(metadata.ipnft)	
 		}
 		} catch (error) {
 		console.log(error)
@@ -40,97 +52,44 @@ function CreateNFT(props) {
 	}
 
 	return (
-		<center
-			className="root-create-pet"
-			style={{ paddingBottom: '3rem'}}
-		>
-			<div>
-			<h2 className="title" color="textPrimary" gutterBottom>
-				Upload Your Document
-			</h2>
-			
-			{
-	image ? (
-		<img src={URL.createObjectURL(image)} alt="pet" className="img-preview" height={300}/>
-	) : (
-		''
+		<Box display='flex' justifyContent="center" margin='8' borderRadius='lg' h="550px">
+			<Box display='flex' justifyContent="center" bg='blue.100' w='600px' borderRadius='lg'>
+				<Stack padding='10' direction='column' justifyContent='center'>
+				{image ? (
+					<Box boxSize='sm'>
+						<Image src={URL.createObjectURL(image)} alt="NFT" height="300px"/>
+					</Box>
+					) : ('')}
+				<input
+					accept="image/*"
+					className="input"
+					id="icon-button-photo"
+					defaultValue={image}
+					onChange={handleImage}
+					type="file"
+					/>
+				</Stack>
+			</Box>
+			<Divider orientation='vertical' w='10px'/>
+			<Box bg='blue.100' w='600px' borderRadius='lg'>
+				<Stack padding='10' direction='column' id='rightbox'>
+					<Box h='100px'/>
+					<Text>Title: </Text>
+					<Input placeholder='Title' variant='filled' onChange={(e) => setNftName(e.target.value)}/>
+					<Text>Description: </Text>
+					<Input placeholder='Description' variant='filled' onChange={(e) => setDescription(e.target.value)}/>
+					<Box></Box>
+					{isLoading ? (<Button onClick={handleSubmit} loadingText='Submitting' id='submitbutton'>Submit</Button>) : (<Button onClick={handleSubmit} loadingText='Submitting' id='submitbutton' isLoading>Submit</Button>)}
+					<Box height={1}/>
+				</Stack>
+			</Box>
+		</Box>
 	)
-	}
-	<div className="form-container" style={{ height:'500'}}>
-	<form className="form" noValidate autoComplete="off">
-		<span>
-		<input
-		accept="image/*"
-		className="input"
-		id="icon-button-photo"
-		defaultValue={image}
-		onChange={handleImage}
-		type="file"
-		/>
-		</span>
-		<label>NFT Name:</label>
-		<input
-		fullWidth
-		id="outlined-basic"
-		label="NFT's name"
-		variant="outlined"
-		className="text-field"
-		defaultValue={nftName}
-		onChange={(e) => setNftName(e.target.value)}
-		/>
-		<label>Owner Name:</label>
-		<input
-		fullWidth
-		id="outlined-basic"
-		label="Owner's name"
-		variant="outlined"
-		className="text-field"
-		defaultValue={description}
-		onChange={(e) => setDescription(e.target.value)}
-		/>
-		<button
-		size="large"
-		variant="contained"
-		color="primary"
-		onClick={handleSubmit}
-		>
-		Submit
-		</button>
-		<h3 id="status" className='notification'></h3>
-	</form>
-	</div>
-        </div>
-      </center>
-  )
 }
 
 export default CreateNFT;
 
-  // mintNFTRequest() { async (t) => {
-  //   t.preventDefault();
-  //   newrequest = this.requests;
-  //   const sender = document.getElementById("currentaccount").value;
-  //   var tokenid = totalSupply().add(1);
-  //   const url = document.getElementById("url").value;
-
-  //   newrequest.push({sender: sender, id: tokenid, url: url})
-  //   console.log(newrequest);
-  //   this.setState({requests: newrequest})  
-  // };}
-
-    // approveNFTRequest() { async (t) => {
-  //   //get values
-  //   //unlock account
-  //   await this.state.web3.eth.personal.unlockAccount(this.owner, this.password, 600); 
-  //   // Get permission to access user funds to pay for gas fees
-  //   const gas = await mintNFTContract.methods.mint(address, tokenid, urlstring).estimateGas();
-  //   const post = await mintNFTContract.methods.mint(address, tokenid, urlstring).send({
-  //     from: account,
-  //     gas,
-  //   });
-  // };}
-
-    // rejectNFTRequest() { async (t) => {
-  //   //send notification to address
-  // }
-  // }
+// rejectNFTRequest() { async (t) => {
+//   //send notification to address
+// }
+// }
